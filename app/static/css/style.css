@@ -1,0 +1,176 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #0f1419;
+    color: #e0e6ed;
+    line-height: 1.6;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+/* Cabecera */
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #1f2937;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #5b7fff;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+/* Layout principal */
+main {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+section {
+    margin-bottom: 2.5rem;
+}
+
+/* Botones */
+.acciones {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#btn-crear {
+    background-color: #1fb57f;
+    color: white;
+}
+
+#btn-crear:hover {
+    background-color: #17a06e;
+    transform: translateY(-2px);
+}
+
+#btn-borrar {
+    background-color: #e55934;
+    color: white;
+}
+
+#btn-borrar:hover {
+    background-color: #c84a28;
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Lista de contenedores */
+.lista h2 {
+    color: #b8c5ff;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+#lista-contenedores {
+    list-style: none;
+    display: grid;
+    gap: 0.75rem;
+}
+
+#lista-contenedores li {
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+}
+
+#lista-contenedores li.vacio {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    display: block;
+}
+
+.contenedor-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contenedor-nombre {
+    font-weight: 600;
+    color: #e0e6ed;
+    font-size: 1.1rem;
+}
+
+.contenedor-detalles {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.estado {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.estado-running {
+    background-color: #0f3d2e;
+    color: #7fe5bf;
+}
+
+.estado-exited {
+    background-color: #2b1410;
+    color: #ffaa88;
+}
+
+/* Mensajes de feedback */
+#mensaje {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+    display: none;
+}
+
+#mensaje.exito {
+    display: block;
+    background-color: #0f3d2e;
+    color: #7fe5bf;
+    border: 1px solid #1fb57f;
+}
+
+#mensaje.error {
+    display: block;
+    background-color: #2b1410;
+    color: #ffaa88;
+    border: 1px solid #e55934;
+}

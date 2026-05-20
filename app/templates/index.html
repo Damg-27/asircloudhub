@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>ASIR CloudHub — Panel de control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>ASIR CloudHub</h1>
+        <p class="subtitle">Panel de control de contenedores Docker</p>
+    </header>
+
+    <main>
+        <section class="acciones">
+            <button id="btn-crear">Crear contenedor de prueba</button>
+            <button id="btn-borrar">Borrar contenedor de prueba</button>
+        </section>
+
+        <section class="lista">
+            <h2>Contenedores activos</h2>
+            <div id="mensaje"></div>
+            <ul id="lista-contenedores">
+                <li class="vacio">Cargando...</li>
+            </ul>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
