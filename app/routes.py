@@ -31,3 +31,11 @@ def delete_test():
     from app.docker_manager import delete_test_container
     resultado = delete_test_container()
     return jsonify(resultado)
+
+
+@bp.route("/api/stacks/lamp", methods=["POST"])
+def deploy_lamp_stack():
+    """Despliega un stack LAMP."""
+    from app.stacks.lamp import deploy_lamp
+    resultado = deploy_lamp()
+    return jsonify(resultado), 201
