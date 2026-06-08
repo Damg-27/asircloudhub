@@ -1,20 +1,20 @@
 import os
-import uuid
-import docker
 import grp
+import uuid
 import subprocess
+import docker
 from app.port_manager import get_free_port
 
 client = docker.from_env()
 
-# Carpeta base donde se guarda el código de cada stack en el VPS
 STACKS_DATA_DIR = "/home/damg/stacks_data"
 
 
 def _pull_imagenes():
     """Descarga las imágenes necesarias si no están en local."""
+    client.images.pull("nginx", tag="alpine")
+    client.images.pull("php", tag="8.2-fpm")
     client.images.pull("mysql", tag="8.0")
-    client.images.pull("php", tag="8.2-apache")
 
 
 def _crear_index_bienvenida(ruta_www, mysql_host):
@@ -26,7 +26,7 @@ header('Content-Type: text/html; charset=utf-8');
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Stack LAMP listo</title>
+    <title>Stack LEMP listo</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                max-width: 700px; margin: 3rem auto; padding: 1rem; line-height: 1.6;
@@ -41,7 +41,7 @@ header('Content-Type: text/html; charset=utf-8');
     </style>
 </head>
 <body>
-    <h1>Stack LAMP desplegado correctamente</h1>
+    <h1>Stack LEMP desplegado correctamente</h1>
     <div class="card">
         <p><strong>Versión PHP:</strong> <?php echo phpversion(); ?></p>
         <p><strong>Servidor:</strong> <?php echo $_SERVER['SERVER_SOFTWARE']; ?></p>
@@ -71,6 +71,35 @@ header('Content-Type: text/html; charset=utf-8');
         f.write(contenido)
 
 
+def _crear_nginx_conf(ruta_stack, php_fpm_host):
+    """Genera el fichero default.conf de Nginx que delega los .php a PHP-FPM."""
+    config = """server {
+    listen 80 default_server;
+    server_name _;
+    root /var/www/html;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \\.php$ {
+        fastcgi_pass __PHP_FPM_HOST__:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\\.ht {
+        deny all;
+    }
+}
+"""
+    config = config.replace("__PHP_FPM_HOST__", php_fpm_host)
+    ruta_conf = os.path.join(ruta_stack, "nginx.conf")
+    with open(ruta_conf, "w", encoding="utf-8") as f:
+        f.write(config)
+    return ruta_conf
 
 
 def _aplicar_permisos_equipo(ruta, equipo):
@@ -81,66 +110,60 @@ def _aplicar_permisos_equipo(ruta, equipo):
     """
     grupo_linux = f"team_{equipo}"
 
-    # Verificar que el grupo existe
     try:
         grp.getgrnam(grupo_linux)
     except KeyError:
         raise ValueError(f"El grupo {grupo_linux} no existe en el sistema")
 
-    # Propietario y grupo: root:team_xxx
     subprocess.run(["sudo", "chown", "-R", f"root:{grupo_linux}", ruta], check=True)
-
-    # Permisos clásicos: 770 (solo root y team_xxx pueden acceder)
     subprocess.run(["sudo", "chmod", "-R", "u=rwX,g=rwX,o=", ruta], check=True)
-
-    # ACL: dar lectura/ejecución al UID 33 (www-data del contenedor Apache)
-    # -R: recursivo
-    # -m: modificar
-    # u:33:rX  → al usuario con UID 33, rx en carpetas, r en ficheros
+    # ACL para www-data (PHP-FPM, UID 33)
     subprocess.run(["sudo", "setfacl", "-R", "-m", "u:33:rX", ruta], check=True)
-
-    # ACL default: para que ficheros nuevos que cree el developer también
-    # hereden el permiso de lectura para www-data
     subprocess.run(["sudo", "setfacl", "-R", "-d", "-m", "u:33:rX", ruta], check=True)
+    # ACL para nginx (UID 101 en alpine)
+    subprocess.run(["sudo", "setfacl", "-R", "-m", "u:101:rX", ruta], check=True)
+    subprocess.run(["sudo", "setfacl", "-R", "-d", "-m", "u:101:rX", ruta], check=True)
 
-
-
-def deploy_lamp(equipo):
+def deploy_lemp(equipo):
     """
-    Despliega un stack LAMP: Apache + PHP + MySQL.
+    Despliega un stack LEMP: Nginx + PHP-FPM + MySQL.
 
     Crea una red aislada, un volumen para MySQL, una carpeta compartida
-    con el contenedor web (para que el developer suba código) y los
-    dos contenedores con un nombre único.
+    entre Nginx y PHP-FPM (para que el developer suba código) y los
+    tres contenedores con un nombre único.
 
     Returns:
         dict: información del stack desplegado.
     """
     _pull_imagenes()
 
-    # Nombre único del stack
     sufijo = uuid.uuid4().hex[:6]
-    nombre_stack = f"lamp_{sufijo}"
+    nombre_stack = f"lemp_{sufijo}"
 
     red_nombre = f"{nombre_stack}_red"
     volumen_db = f"{nombre_stack}_db"
     mysql_nombre = f"{nombre_stack}_mysql"
-    web_nombre = f"{nombre_stack}_web"
+    php_nombre = f"{nombre_stack}_php"
+    nginx_nombre = f"{nombre_stack}_nginx"
 
-    # Carpeta compartida con el contenedor web (código del developer)
-    ruta_www = os.path.join(STACKS_DATA_DIR, nombre_stack, "www")
+    # Carpeta del stack: contendrá www/ y nginx.conf
+    ruta_stack = os.path.join(STACKS_DATA_DIR, nombre_stack)
+    ruta_www = os.path.join(ruta_stack, "www")
     os.makedirs(ruta_www, exist_ok=True)
 
-    # Crear index.php de bienvenida en esa carpeta
+    # index.php de bienvenida
     _crear_index_bienvenida(ruta_www, mysql_nombre)
 
-    # Aplicar permisos: solo el grupo del equipo puede acceder
-    _aplicar_permisos_equipo(os.path.join(STACKS_DATA_DIR, nombre_stack), equipo)
+    # Config de Nginx con el nombre del contenedor PHP-FPM
+    ruta_nginx_conf = _crear_nginx_conf(ruta_stack, php_nombre)
+
+    # Permisos del equipo (sobre toda la carpeta del stack)
+    _aplicar_permisos_equipo(ruta_stack, equipo)
 
     # Red aislada
     client.networks.create(red_nombre, driver="bridge")
 
-    # Volumen persistente para MySQL
+    # Volumen MySQL
     client.volumes.create(volumen_db)
 
     # Contenedor MySQL
@@ -159,65 +182,82 @@ def deploy_lamp(equipo):
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,
-            "asircloudhub.tipo": "lamp",
+            "asircloudhub.tipo": "lemp",
             "asircloudhub.ruta_codigo": ruta_www,
             "asircloudhub.equipo": equipo,
         },
     )
 
-    # Puerto libre para el servidor web
-    puerto_web = get_free_port()
-
-    gid_equipo = grp.getgrnam(f"team_{equipo}").gr_gid
-    # Contenedor Apache + PHP con la carpeta del developer montada
-    web = client.containers.run(
-        image="php:8.2-apache",
-        name=web_nombre,
+    # Contenedor PHP-FPM con mysqli pre-instalado
+    client.containers.run(
+        image="php:8.2-fpm",
+        name=php_nombre,
         network=red_nombre,
-        ports={"80/tcp": puerto_web},
         volumes={ruta_www: {"bind": "/var/www/html", "mode": "rw"}},
         mem_limit="256m",
         detach=True,
         command=[
             "bash", "-c",
-            "docker-php-ext-install mysqli && apache2-foreground"
+            "docker-php-ext-install mysqli && php-fpm"
         ],
-        
         labels={
             "asircloudhub.stack": nombre_stack,
-            "asircloudhub.tipo": "lamp",
+            "asircloudhub.tipo": "lemp",
             "asircloudhub.ruta_codigo": ruta_www,
             "asircloudhub.equipo": equipo,
         },
     )
 
-    # Espera breve para que Apache vuelva a aceptar peticiones con mysqli cargado
+    # Puerto público para Nginx
+    puerto_web = get_free_port()
+
+    # Contenedor Nginx (sirve estáticos y delega PHP a PHP-FPM)
+    client.containers.run(
+        image="nginx:alpine",
+        name=nginx_nombre,
+        network=red_nombre,
+        ports={"80/tcp": puerto_web},
+        volumes={
+            ruta_www: {"bind": "/var/www/html", "mode": "ro"},
+            ruta_nginx_conf: {"bind": "/etc/nginx/conf.d/default.conf", "mode": "ro"},
+        },
+        mem_limit="128m",
+        detach=True,
+        labels={
+            "asircloudhub.stack": nombre_stack,
+            "asircloudhub.tipo": "lemp",
+            "asircloudhub.ruta_codigo": ruta_www,
+            "asircloudhub.equipo": equipo,
+        },
+    )
+
+    # Esperar a que PHP-FPM instale mysqli y arranque
     import time
-    time.sleep(12)
+    time.sleep(8)
 
     return {
         "stack": nombre_stack,
-        "tipo": "lamp",
+        "tipo": "lemp",
         "equipo": equipo,
         "puerto": puerto_web,
         "url": f"http://localhost:{puerto_web}",
         "ruta_codigo": ruta_www,
-        "contenedores": [mysql_nombre, web_nombre],
+        "contenedores": [mysql_nombre, php_nombre, nginx_nombre],
     }
 
 
-def delete_lamp(nombre_stack):
+def delete_lemp(nombre_stack):
     """
-    Elimina un stack LAMP completo: contenedores, red, volumen
+    Elimina un stack LEMP completo: contenedores, red, volumen
     y carpeta de código del developer.
     """
     red_nombre = f"{nombre_stack}_red"
     volumen_db = f"{nombre_stack}_db"
     mysql_nombre = f"{nombre_stack}_mysql"
-    web_nombre = f"{nombre_stack}_web"
+    php_nombre = f"{nombre_stack}_php"
+    nginx_nombre = f"{nombre_stack}_nginx"
 
-    # Parar y borrar contenedores
-    for nombre in [web_nombre, mysql_nombre]:
+    for nombre in [nginx_nombre, php_nombre, mysql_nombre]:
         try:
             c = client.containers.get(nombre)
             c.stop()
@@ -225,19 +265,16 @@ def delete_lamp(nombre_stack):
         except docker.errors.NotFound:
             pass
 
-    # Borrar red
     try:
         client.networks.get(red_nombre).remove()
     except docker.errors.NotFound:
         pass
 
-    # Borrar volumen de la BD
     try:
         client.volumes.get(volumen_db).remove()
     except docker.errors.NotFound:
         pass
 
-    # Borrar carpeta de código del stack
     ruta_stack = os.path.join(STACKS_DATA_DIR, nombre_stack)
     if os.path.isdir(ruta_stack):
         subprocess.run(["sudo", "rm", "-rf", ruta_stack], check=True)

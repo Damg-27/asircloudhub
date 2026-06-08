@@ -7,22 +7,51 @@
 </head>
 <body>
     <header>
-        <h1>ASIR CloudHub</h1>
-        <p class="subtitle">Panel de control de contenedores Docker</p>
-    </header>
+    <h1>ASIR CloudHub</h1>
+        <p class="subtitle">Panel de despliegue de stacks Docker</p>
+        <button id="btn-limpiar" class="btn-limpiar">🧹 Limpiar recursos huérfanos</button>
+</header>
 
     <main>
+        <!-- Sección de despliegue -->
         <section class="acciones">
-            <button id="btn-crear">Crear contenedor de prueba</button>
-            <button id="btn-borrar">Borrar contenedor de prueba</button>
+            <h2>Desplegar nuevo stack</h2>
+
+            <div class="form-equipo">
+                <label for="equipo-select">Asignar al equipo:</label>
+                <select id="equipo-select">
+                    <option value="webdev">Webdev (frontend / full-stack)</option>
+                    <option value="backend">Backend (APIs y servicios)</option>
+                    <option value="marketing">Marketing</option>
+                </select>
+            </div>
+
+            <div class="grid-botones">
+                <button class="btn-stack" data-tipo="lamp">
+                    <span class="stack-nombre">LAMP</span>
+                    <span class="stack-desc">Apache + PHP + MySQL</span>
+                </button>
+                <button class="btn-stack" data-tipo="lemp">
+                    <span class="stack-nombre">LEMP</span>
+                    <span class="stack-desc">Nginx + PHP + MySQL</span>
+                </button>
+                <button class="btn-stack" data-tipo="wordpress">
+                    <span class="stack-nombre">WordPress</span>
+                    <span class="stack-desc">Nginx + WP + MariaDB</span>
+                </button>
+               
+            </div>
         </section>
 
+        <!-- Mensaje de feedback -->
+        <div id="mensaje"></div>
+
+        <!-- Sección de stacks desplegados -->
         <section class="lista">
-            <h2>Contenedores activos</h2>
-            <div id="mensaje"></div>
-            <ul id="lista-contenedores">
-                <li class="vacio">Cargando...</li>
-            </ul>
+            <h2>Stacks desplegados</h2>
+            <div id="lista-stacks">
+                <p class="vacio">Cargando...</p>
+            </div>
         </section>
     </main>
 
