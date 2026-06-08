@@ -1,4 +1,6 @@
-/* Reset básico */
+/* ============================================
+   Reset y base
+   ============================================ */
 * {
     margin: 0;
     padding: 0;
@@ -14,7 +16,9 @@ body {
     min-height: 100vh;
 }
 
-/* Cabecera */
+/* ============================================
+   Cabecera
+   ============================================ */
 header {
     text-align: center;
     margin-bottom: 3rem;
@@ -33,9 +37,11 @@ header h1 {
     font-size: 1.1rem;
 }
 
-/* Layout principal */
+/* ============================================
+   Layout principal
+   ============================================ */
 main {
-    max-width: 900px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -43,119 +49,251 @@ section {
     margin-bottom: 2.5rem;
 }
 
-/* Botones */
-.acciones {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+section h2 {
+    color: #b8c5ff;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
 }
 
-button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
+/* ============================================
+   Selector de equipo
+   ============================================ */
+.form-equipo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: #1a1f2e;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #2d3748;
+}
+
+.form-equipo label {
+    color: #94a3b8;
     font-weight: 600;
+}
+
+.form-equipo select {
+    flex: 1;
+    background-color: #0f1419;
+    color: #e0e6ed;
+    border: 1px solid #2d3748;
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.form-equipo select:focus {
+    outline: none;
+    border-color: #5b7fff;
+}
+
+/* ============================================
+   Botones de despliegue
+   ============================================ */
+.grid-botones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.btn-stack {
+    background-color: #1a1f2e;
+    color: #e0e6ed;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 1.25rem 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    text-align: center;
+}
+
+.btn-stack:hover:not(:disabled) {
+    background-color: #1fb57f;
+    border-color: #1fb57f;
+    transform: translateY(-2px);
+}
+
+.btn-stack:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-stack .stack-nombre {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.btn-stack .stack-desc {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.btn-stack:hover:not(:disabled) .stack-desc {
+    color: #d4f5e3;
+}
+
+/* ============================================
+   Lista de stacks desplegados
+   ============================================ */
+#lista-stacks {
+    display: grid;
+    gap: 1rem;
+}
+
+.vacio {
+    text-align: center;
+    color: #64748b;
+    font-style: italic;
+    padding: 2rem;
+}
+
+.stack-card {
+    background-color: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.stack-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.stack-card-tipo {
+    background-color: #5b7fff;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stack-card-equipo {
+    background-color: #2a2410;
+    color: #f4d87c;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #f1c40f;
+}
+
+.stack-card-nombre {
+    font-weight: 600;
+    color: #e0e6ed;
+    font-size: 1.05rem;
+    flex: 1;
+}
+
+.stack-card-btn-borrar {
+    background-color: #e55934;
+    color: white;
     border: none;
     border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-#btn-crear {
-    background-color: #1fb57f;
-    color: white;
-}
-
-#btn-crear:hover {
-    background-color: #17a06e;
-    transform: translateY(-2px);
-}
-
-#btn-borrar {
-    background-color: #e55934;
-    color: white;
-}
-
-#btn-borrar:hover {
+.stack-card-btn-borrar:hover:not(:disabled) {
     background-color: #c84a28;
-    transform: translateY(-2px);
 }
 
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Lista de contenedores */
-.lista h2 {
-    color: #b8c5ff;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-#lista-contenedores {
-    list-style: none;
-    display: grid;
-    gap: 0.75rem;
-}
-
-#lista-contenedores li {
-    background-color: #1a1f2e;
-    border: 1px solid #2d3748;
-    border-radius: 8px;
-    padding: 1rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 1rem;
-}
-
-#lista-contenedores li.vacio {
-    text-align: center;
-    color: #64748b;
-    font-style: italic;
-    display: block;
-}
-
-.contenedor-info {
+/* Caja de "copia esto" */
+.copyable {
     display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #0f1419;
+    border: 1px solid #2d3748;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
 }
 
-.contenedor-nombre {
+.copyable-label {
+    color: #94a3b8;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: #e0e6ed;
-    font-size: 1.1rem;
+    min-width: 60px;
 }
 
-.contenedor-detalles {
+.copyable-value {
+    flex: 1;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
     font-size: 0.9rem;
+    color: #7fe5bf;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.copyable-btn {
+    background-color: #2d3748;
+    color: #e0e6ed;
+    border: none;
+    border-radius: 4px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.copyable-btn:hover {
+    background-color: #5b7fff;
+}
+
+.copyable-btn.copiado {
+    background-color: #1fb57f;
+}
+
+.stack-card-contenedores {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.contenedor-tag {
+    background-color: #0a1929;
+    border: 1px solid #2d3748;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
     color: #94a3b8;
 }
 
-.estado {
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
+.contenedor-tag.running::before {
+    content: "● ";
+    color: #1fb57f;
 }
 
-.estado-running {
-    background-color: #0f3d2e;
-    color: #7fe5bf;
+.contenedor-tag.exited::before {
+    content: "● ";
+    color: #e55934;
 }
 
-.estado-exited {
-    background-color: #2b1410;
-    color: #ffaa88;
-}
-
-/* Mensajes de feedback */
+/* ============================================
+   Mensajes de feedback
+   ============================================ */
 #mensaje {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding: 0.85rem;
     border-radius: 6px;
     text-align: center;
     display: none;
@@ -173,4 +311,41 @@ button:disabled {
     background-color: #2b1410;
     color: #ffaa88;
     border: 1px solid #e55934;
+}
+
+#mensaje.info {
+    display: block;
+    background-color: #1a2845;
+    color: #b8c5ff;
+    border: 1px solid #5b7fff;
+}
+
+.btn-limpiar {
+    margin-top: 1rem;
+    background-color: transparent;
+    color: #94a3b8;
+    border: 1px solid #2d3748;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-limpiar:hover {
+    background-color: #1a1f2e;
+    color: #b8c5ff;
+    border-color: #5b7fff;
+}
+
+
+.copyable-esperando {
+    background-color: #1a2845;
+    border-color: #5b7fff;
+}
+
+.copyable-esperando .copyable-value {
+    color: #b8c5ff;
+    font-style: italic;
 }
