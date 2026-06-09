@@ -1,4 +1,5 @@
 import os
+import time
 import grp
 import uuid
 import subprocess
@@ -18,7 +19,7 @@ def _pull_imagenes():
 
 
 def _crear_index_bienvenida(ruta_www, mysql_host):
-    """Crea un index.php de bienvenida en la carpeta del stack."""
+    """Crea un index.php de bienvenida con guía completa para el developer."""
     contenido = """<?php
 header('Content-Type: text/html; charset=utf-8');
 ?>
@@ -29,46 +30,100 @@ header('Content-Type: text/html; charset=utf-8');
     <title>Stack LEMP listo</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-               max-width: 700px; margin: 3rem auto; padding: 1rem; line-height: 1.6;
+               max-width: 800px; margin: 2rem auto; padding: 1rem; line-height: 1.6;
                background: #f5f7fa; color: #1a1a1a; }
         h1 { color: #1fb57f; }
+        h3 { color: #475569; margin-top: 1.5rem; }
         .card { background: white; padding: 1.5rem; border-radius: 8px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1rem; }
         code { background: #f0f0f0; padding: 0.15rem 0.4rem; border-radius: 3px;
-               font-size: 0.95em; }
+               font-size: 0.95em; color: #c41e3a; }
+        pre { background: #1a1f2e; color: #e0e6ed; padding: 1rem; border-radius: 6px;
+              overflow-x: auto; font-size: 0.9em; }
+        pre code { background: transparent; color: #7fe5bf; padding: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+        td { padding: 0.5rem; border-bottom: 1px solid #e2e8f0; }
+        td:first-child { font-weight: 600; color: #475569; width: 35%; }
         .ok { color: #1fb57f; font-weight: bold; }
         .warn { color: #e55934; font-weight: bold; }
+        .badge { display: inline-block; background: #5b7fff; color: white;
+                 padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8em;
+                 font-weight: 600; }
     </style>
 </head>
 <body>
-    <h1>Stack LEMP desplegado correctamente</h1>
+    <h1>Stack LEMP listo para usar</h1>
+
     <div class="card">
-        <p><strong>Versión PHP:</strong> <?php echo phpversion(); ?></p>
-        <p><strong>Servidor:</strong> <?php echo $_SERVER['SERVER_SOFTWARE']; ?></p>
-        <p><strong>Estado MySQL:</strong>
-        <?php
-        $conn = @mysqli_connect("__MYSQL_HOST__", "appuser", "apppass", "appdb");
-        if ($conn) {
-            echo '<span class="ok">conectado correctamente</span>';
-            mysqli_close($conn);
-        } else {
-            echo '<span class="warn">inicializando, espera...</span>';
-            echo '<script>setTimeout(function(){ location.reload(); }, 3000);</script>';
-        }
-        ?>
-        </p>
+        <h3>Estado del entorno</h3>
+        <table>
+            <tr><td>Versión PHP</td><td><?php echo phpversion(); ?></td></tr>
+            <tr><td>Servidor</td><td><?php echo $_SERVER['SERVER_SOFTWARE']; ?></td></tr>
+            <tr><td>Estado MySQL</td><td>
+            <?php
+            $conn = @mysqli_connect("__MYSQL_HOST__", "appuser", "apppass", "appdb");
+            if ($conn) {
+                echo '<span class="ok">conectado correctamente</span>';
+                mysqli_close($conn);
+            } else {
+                echo '<span class="warn">inicializando, espera...</span>';
+                echo '<script>setTimeout(function(){ location.reload(); }, 3000);</script>';
+            }
+            ?>
+            </td></tr>
+        </table>
     </div>
+
     <div class="card">
-        <h3>¿Cómo subir tu código?</h3>
-        <p>Reemplaza este fichero (<code>index.php</code>) por el código de tu aplicación en la carpeta compartida del stack.</p>
-        <p>Cualquier fichero <code>.php</code>, <code>.html</code>, CSS o JS que coloques ahí será servido automáticamente.</p>
+        <h3>Conexión a la base de datos</h3>
+        <p>Tu aplicación PHP debe usar estos datos para conectar con MySQL:</p>
+        <table>
+            <tr><td>Host</td><td><code>__MYSQL_HOST__</code></td></tr>
+            <tr><td>Usuario</td><td><code>appuser</code></td></tr>
+            <tr><td>Contraseña</td><td><code>apppass</code></td></tr>
+            <tr><td>Base de datos</td><td><code>appdb</code></td></tr>
+            <tr><td>Puerto</td><td><code>3306</code> (interno, no necesitas especificarlo)</td></tr>
+        </table>
+
+        <p style="margin-top: 1rem;"><strong>Ejemplo en PHP:</strong></p>
+        <pre><code>$conn = mysqli_connect("__MYSQL_HOST__", "appuser", "apppass", "appdb");
+if (!$conn) {
+    die("Error: " . mysqli_connect_error());
+}</code></pre>
     </div>
+
+    <div class="card">
+        <h3>Cómo subir tu código</h3>
+        <p>Sustituye este fichero (<code>index.php</code>) y sube los ficheros de tu aplicación a la carpeta compartida del stack mediante SFTP.</p>
+
+        <p><strong>Importante:</strong></p>
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>El punto de entrada debe llamarse <code>index.php</code> (o <code>index.html</code>) para que se cargue al abrir la URL del stack.</li>
+            <li>Puedes subir cualquier estructura de carpetas: subdirectorios, assets, includes, etc.</li>
+            <li>Los cambios se reflejan inmediatamente, sin necesidad de reiniciar nada.</li>
+            <li>Los datos guardados en MySQL persisten aunque el contenedor se reinicie.</li>
+        </ul>
+
+        <p style="margin-top: 1rem;"><strong>Conexión SFTP:</strong></p>
+        <table>
+            <tr><td>Servidor</td><td>la IP o dominio del VPS</td></tr>
+            <tr><td>Puerto</td><td><code>22</code></td></tr>
+            <tr><td>Usuario</td><td>el de tu equipo (lo proporciona el admin)</td></tr>
+            <tr><td>Carpeta destino</td><td>la indicada por el admin en el ticket</td></tr>
+        </table>
+    </div>
+
+    <p style="text-align: center; color: #94a3b8; font-size: 0.85rem;">
+        ASIR CloudHub — Plataforma de entornos de desarrollo
+    </p>
 </body>
 </html>
 """
     contenido = contenido.replace("__MYSQL_HOST__", mysql_host)
     with open(os.path.join(ruta_www, "index.php"), "w", encoding="utf-8") as f:
         f.write(contenido)
+
+
 
 
 def _crear_nginx_conf(ruta_stack, php_fpm_host):
@@ -232,7 +287,6 @@ def deploy_lemp(equipo):
     )
 
     # Esperar a que PHP-FPM instale mysqli y arranque
-    import time
     time.sleep(8)
 
     return {

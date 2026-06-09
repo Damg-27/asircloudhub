@@ -1,4 +1,5 @@
 import os
+import time
 import grp
 import uuid
 import subprocess
@@ -122,7 +123,7 @@ def deploy_wordpress(equipo):
     )
 
     # Esperar a que WordPress copie sus ficheros al volumen montado
-    import time
+
     time.sleep(10)
 
     return {
