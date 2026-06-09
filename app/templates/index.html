@@ -7,10 +7,13 @@
 </head>
 <body>
     <header>
-    <h1>ASIR CloudHub</h1>
+        <h1>ASIR CloudHub</h1>
         <p class="subtitle">Panel de despliegue de stacks Docker</p>
-        <button id="btn-limpiar" class="btn-limpiar">🧹 Limpiar recursos huérfanos</button>
-</header>
+        <div class="header-actions">
+            <button id="btn-limpiar" class="btn-limpiar">🧹 Limpiar recursos huérfanos</button>
+            <a href="{{ url_for('main.logout') }}" class="btn-logout">Salir</a>
+        </div>
+    </header>
 
     <main>
         <!-- Sección de despliegue -->
