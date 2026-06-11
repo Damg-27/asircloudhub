@@ -35,10 +35,6 @@ def logout_admin():
 def requiere_login(f):
     """
     Decorador que protege un endpoint exigiendo sesión de admin activa.
-
-    Si la petición es a una URL de API (/api/...) y no hay sesión,
-    devuelve JSON con error 401.
-    Si es a una página normal, redirige al login.
     """
     @wraps(f)
     def wrapper(*args, **kwargs):

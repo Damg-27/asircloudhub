@@ -89,6 +89,20 @@ def deploy_wordpress_stack():
     from app.stacks.wordpress import deploy_wordpress
     return _desplegar_stack(deploy_wordpress)
 
+@bp.route("/api/stacks/phpmyadmin", methods=["POST"])
+@requiere_login
+def deploy_phpmyadmin_stack():
+    """Despliega el stack único de phpMyAdmin."""
+    from app.stacks.phpmyadmin import deploy_phpmyadmin
+    try:
+        resultado = deploy_phpmyadmin()
+        return jsonify(resultado), 201
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except docker.errors.APIError as e:
+        return jsonify({"error": f"Error de Docker: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"No se pudo desplegar phpMyAdmin: {str(e)}"}), 500
 
 @bp.route("/api/stacks/<nombre_stack>", methods=["DELETE"])
 @requiere_login
@@ -104,6 +118,9 @@ def delete_stack(nombre_stack):
         elif nombre_stack.startswith("wp_"):
             from app.stacks.wordpress import delete_wordpress
             resultado = delete_wordpress(nombre_stack)
+        elif nombre_stack == "phpmyadmin":
+            from app.stacks.phpmyadmin import delete_phpmyadmin
+            resultado = delete_phpmyadmin(nombre_stack)
         else:
             return jsonify({
                 "error": f"Tipo de stack no reconocido: {nombre_stack}"

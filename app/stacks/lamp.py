@@ -246,6 +246,10 @@ def deploy_lamp(equipo):
     # Espera breve para que Apache vuelva a aceptar peticiones con mysqli cargado
      
     time.sleep(12)
+    
+# Si phpMyAdmin está desplegado, conectarlo a la red de este stack
+    from app.stacks.phpmyadmin import conectar_a_red
+    conectar_a_red(red_nombre)
 
     return {
         "stack": nombre_stack,

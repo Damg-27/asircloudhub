@@ -22,8 +22,9 @@ function mostrarMensaje(texto, tipo) {
 
 // Función auxiliar: copiar texto al portapapeles
 async function copiarAlPortapapeles(texto, boton) {
-    try {
-        await navigator.clipboard.writeText(texto);
+    const exito = await intentarCopiar(texto);
+
+    if (exito) {
         const textoOriginal = boton.textContent;
         boton.textContent = "Copiado ✓";
         boton.classList.add("copiado");
@@ -31,9 +32,41 @@ async function copiarAlPortapapeles(texto, boton) {
             boton.textContent = textoOriginal;
             boton.classList.remove("copiado");
         }, 1500);
-    } catch (error) {
+    } else {
         mostrarMensaje("No se pudo copiar al portapapeles", "error");
     }
+}
+
+/**
+ * Intenta copiar al portapapeles con la API moderna o un fallback.
+ * Devuelve true si lo consigue, false si falla.
+ */
+async function intentarCopiar(texto) {
+    // Intento moderno (HTTPS o localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(texto);
+            return true;
+        } catch {
+            // sigue al fallback
+        }
+    }
+    // Fallback clásico para HTTP plano
+    const textarea = document.createElement("textarea");
+    textarea.value = texto;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    let exito = false;
+    try {
+        exito = document.execCommand("copy");
+    } catch {
+        exito = false;
+    }
+    document.body.removeChild(textarea);
+    return exito;
 }
 
 // GET /api/stacks — listar y pintar
@@ -109,7 +142,6 @@ async function cargarStacks() {
 
 async function desplegarStack(tipo) {
     const equipo = equipoSelect.value;
-
     // Deshabilitar todos los botones mientras se despliega
     botonesStack.forEach(b => b.disabled = true);
     mostrarMensaje(
@@ -118,18 +150,20 @@ async function desplegarStack(tipo) {
     );
 
     try {
+        // phpMyAdmin no requiere equipo (es global)
+        const body = tipo === "phpmyadmin" ? {} : { equipo: equipo };
+
         const respuesta = await fetch(`/api/stacks/${tipo}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ equipo: equipo }),
+            body: JSON.stringify(body),
         });
         const datos = await respuesta.json();
 
         if (respuesta.ok) {
-            // Refrescar la lista PRIMERO para que la tarjeta y el mensaje aparezcan juntos
             await cargarStacks();
             mostrarMensaje(
-                `Stack ${datos.stack} desplegado para ${datos.equipo}. La URL estará disponible en unos segundos.`,
+                `Stack ${datos.stack} desplegado correctamente. La URL estará disponible en unos segundos.`,
                 "exito"
             );
         } else {
@@ -139,13 +173,13 @@ async function desplegarStack(tipo) {
         mostrarMensaje("Error de conexión", "error");
         console.error(error);
     } finally {
-        // Reactivar solo los stacks implementados
-        const tiposActivos = ["lamp", "lemp", "wordpress"];
+        const tiposActivos = ["lamp", "lemp", "wordpress", "phpmyadmin"];
         botonesStack.forEach(b => {
             b.disabled = !tiposActivos.includes(b.dataset.tipo);
         });
     }
 }
+
 
 
 

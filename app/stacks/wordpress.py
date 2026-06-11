@@ -125,6 +125,9 @@ def deploy_wordpress(equipo):
     # Esperar a que WordPress copie sus ficheros al volumen montado
 
     time.sleep(10)
+# Si phpMyAdmin está desplegado, conectarlo a la red de este stack
+    from app.stacks.phpmyadmin import conectar_a_red
+    conectar_a_red(red_nombre)
 
     return {
         "stack": nombre_stack,
