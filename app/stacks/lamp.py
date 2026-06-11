@@ -246,7 +246,7 @@ def deploy_lamp(equipo):
     # Espera breve para que Apache vuelva a aceptar peticiones con mysqli cargado
      
     time.sleep(12)
-    
+
 # Si phpMyAdmin está desplegado, conectarlo a la red de este stack
     from app.stacks.phpmyadmin import conectar_a_red
     conectar_a_red(red_nombre)
@@ -280,7 +280,9 @@ def delete_lamp(nombre_stack):
             c.remove()
         except docker.errors.NotFound:
             pass
-
+        
+    from app.stacks.phpmyadmin import desconectar_de_red
+    desconectar_de_red(red_nombre)
     # Borrar red
     try:
         client.networks.get(red_nombre).remove()

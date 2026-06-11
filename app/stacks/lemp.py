@@ -292,7 +292,7 @@ def deploy_lemp(equipo):
 # Si phpMyAdmin está desplegado, conectarlo a la red de este stack
     from app.stacks.phpmyadmin import conectar_a_red
     conectar_a_red(red_nombre)
-    
+
     return {
         "stack": nombre_stack,
         "tipo": "lemp",
@@ -322,7 +322,10 @@ def delete_lemp(nombre_stack):
             c.remove()
         except docker.errors.NotFound:
             pass
-
+    
+    from app.stacks.phpmyadmin import desconectar_de_red
+    desconectar_de_red(red_nombre)
+    
     try:
         client.networks.get(red_nombre).remove()
     except docker.errors.NotFound:

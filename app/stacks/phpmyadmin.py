@@ -126,3 +126,20 @@ def conectar_a_red(red_nombre):
         red.connect(contenedor)
     except docker.errors.APIError:
         pass  # Ya conectado o error puntual
+
+def desconectar_de_red(red_nombre):
+    """
+    Desconecta el contenedor de phpMyAdmin (si existe) de la red dada.
+    Se llama desde delete_lamp/lemp/wordpress antes de borrar la red,
+    ya que Docker no permite borrar redes con contenedores conectados.
+    """
+    try:
+        contenedor = client.containers.get(PMA_NOMBRE)
+    except docker.errors.NotFound:
+        return  # phpMyAdmin no existe, nada que hacer
+
+    try:
+        red = client.networks.get(red_nombre)
+        red.disconnect(contenedor)
+    except docker.errors.APIError:
+        pass  # No estaba conectado o error puntual

@@ -157,7 +157,9 @@ def delete_wordpress(nombre_stack):
             c.remove()
         except docker.errors.NotFound:
             pass
-
+    
+    from app.stacks.phpmyadmin import desconectar_de_red
+    desconectar_de_red(red_nombre)
     try:
         client.networks.get(red_nombre).remove()
     except docker.errors.NotFound:
