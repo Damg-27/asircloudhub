@@ -64,6 +64,7 @@ def deploy_phpmyadmin():
             "UPLOAD_LIMIT": "64M",
         },
         mem_limit="256m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": "phpmyadmin",

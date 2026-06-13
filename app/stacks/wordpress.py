@@ -87,6 +87,7 @@ def deploy_wordpress(equipo):
             "MARIADB_PASSWORD": "wppass",
         },
         mem_limit="512m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,
@@ -113,6 +114,7 @@ def deploy_wordpress(equipo):
             "WORDPRESS_DB_PASSWORD": "wppass",
         },
         mem_limit="384m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,

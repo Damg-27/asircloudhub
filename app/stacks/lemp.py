@@ -234,6 +234,7 @@ def deploy_lemp(equipo):
             "MYSQL_PASSWORD": "apppass",
         },
         mem_limit="512m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,
@@ -250,6 +251,7 @@ def deploy_lemp(equipo):
         network=red_nombre,
         volumes={ruta_www: {"bind": "/var/www/html", "mode": "rw"}},
         mem_limit="256m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         command=[
             "bash", "-c",
@@ -277,6 +279,7 @@ def deploy_lemp(equipo):
             ruta_nginx_conf: {"bind": "/etc/nginx/conf.d/default.conf", "mode": "ro"},
         },
         mem_limit="128m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,

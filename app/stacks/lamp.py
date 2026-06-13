@@ -208,6 +208,7 @@ def deploy_lamp(equipo):
             "MYSQL_PASSWORD": "apppass",
         },
         mem_limit="512m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         labels={
             "asircloudhub.stack": nombre_stack,
@@ -229,6 +230,7 @@ def deploy_lamp(equipo):
         ports={"80/tcp": puerto_web},
         volumes={ruta_www: {"bind": "/var/www/html", "mode": "rw"}},
         mem_limit="256m",
+        restart_policy={"Name": "unless-stopped"},
         detach=True,
         command=[
             "bash", "-c",
